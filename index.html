@@ -4,231 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phiếu Xuất Kho Bán Hàng</title>
-    <!-- Tải Tailwind CSS để tạo kiểu -->
+    <!-- Tải Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Thiết lập font Inter cho toàn bộ tài liệu */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-            padding: 0.5rem; /* Giảm padding tổng thể */
-        }
-        /* Style cho phần in ấn */
-        @media print {
-            body {
-                background-color: white;
-                padding: 0;
-            }
-            .no-print {
-                display: none !important;
-            }
-        }
-        .invoice-container {
-            /* Giảm max-width để phù hợp hơn với màn hình di động khi chụp */
-            max-width: 700px; 
-            margin: 0 auto;
-            background-color: white;
-            padding: 0.75rem; /* Giảm padding bên trong container */
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-            border-radius: 0.5rem;
-        }
-        .table-cell {
-            border: 1px solid #000;
-            padding: 0.2rem 0.4rem; /* Giảm padding ô bảng */
-            text-align: center;
-            height: 32px; /* Giảm chiều cao dòng để gọn hơn */
-            font-size: 0.8rem; /* Giảm font chữ trong bảng */
-        }
-        .total-cell {
-            border: 1px solid #000;
-            padding: 0.2rem 0.4rem;
-            text-align: right;
-            font-weight: 600;
-            font-size: 0.8rem;
-        }
-        /* Style cho các trường có thể chỉnh sửa */
-        .editable-field {
-            border: 1px solid transparent; /* Mặc định trong suốt */
-            padding: 2px 4px;
-            min-width: 30px;
-            display: inline-block;
-            transition: border-color 0.2s;
-        }
-        /* Chỉ hiện hover/focus khi ở chế độ edit */
-        body.edit-mode .editable-field[contenteditable="true"]:hover, 
-        body.edit-mode .editable-field[contenteditable="true"]:focus {
-            outline: 1px solid #3b82f6; /* Viền xanh khi focus */
-            background-color: #f9f9f9;
-        }
-        
-        .item-input {
-            width: 100%;
-            height: 100%;
-            text-align: inherit;
-            border: none;
-            padding: 0;
-            margin: 0;
-            background: none;
-            font-size: inherit;
-        }
-
-        /* Đảm bảo table cell input căn chỉnh đúng */
-        .table-cell-input-text { text-align: left; }
-        .table-cell-input-num { text-align: right; }
-
-        /* Giảm khoảng cách giữa các dòng thông tin khách hàng */
-        .space-y-0\.5 > * + * {
-            margin-top: 0.125rem; /* ~ 2px */
-        }
-        
-        /* Tối ưu bố cục nút thao tác trên di động */
-        @media (max-width: 640px) {
-            .no-print > button {
-                width: 100%;
-                margin-top: 0.5rem;
-            }
-            .no-print {
-                display: block;
-            }
-        }
-    </style>
-</head>
-<body class="text-gray-900">
-
-    <div class="invoice-container">
-        <!-- HEADER -->
-        <div class="text-center mb-4"> <!-- Giảm margin-bottom -->
-            <h1 class="text-lg font-bold uppercase mb-0.5">PHIẾU XUẤT KHO BÁN HÀNG</h1> <!-- Giảm cỡ chữ -->
-            <p class="text-xs italic mb-1" id="document-date">Ngày:</p> <!-- Giảm cỡ chữ -->
-            <p class="text-xs">Nhân viên bán hàng: <span id="employee-name" class="font-semibold editable-field" contenteditable="false">QUYỀN</span></p>
-            <p class="text-xs">SĐT: <span id="employee-phone" class="font-semibold editable-field" contenteditable="false">0896581688</span></p>
-        </div>
-
-        <!-- THÔNG TIN KHÁCH HÀNG & SỐ PHIẾU -->
-        <div class="space-y-0.5 mb-4 text-xs"> <!-- Giảm cỡ chữ và margin-bottom -->
-            <div class="flex flex-col sm:flex-row justify-between items-start">
-                <div class="flex-grow space-y-0.5 w-full sm:w-auto">
-                    <!-- A: Người mua -->
-                    <p class="flex items-start">
-                        <span class="inline-block w-20 flex-shrink-0">Người mua:</span> <!-- Giảm độ rộng nhãn -->
-                        <span id="buyer-name" class="font-semibold flex-grow editable-field" contenteditable="false">A</span>
-                    </p>
-                    <!-- B: SĐT -->
-                    <p class="flex items-start">
-                        <span class="inline-block w-20 flex-shrink-0">SĐT:</span>
-                        <span id="customer-name" class="font-semibold flex-grow editable-field" contenteditable="false">B</span>
-                    </p>
-                    <!-- C: Địa chỉ -->
-                    <p class="flex items-start">
-                        <span class="inline-block w-20 flex-shrink-0">Địa chỉ:</span>
-                        <span id="customer-address" class="font-semibold flex-grow editable-field" contenteditable="false">C</span>
-                    </p>
-                    <!-- D: Diễn giải -->
-                    <p class="flex items-start">
-                        <span class="inline-block w-20 flex-shrink-0">Diễn giải:</span>
-                        <span id="description" class="font-semibold flex-grow editable-field" contenteditable="false">D</span>
-                    </p>
-                </div>
-                <div class="flex-shrink-0 sm:ml-8 pt-2 mt-2 sm:mt-0"> <!-- Giảm margin top -->
-                    <p class="font-bold text-sm">
-                        Số: <span id="so-phieu" class="text-black">PXK281025X999</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- BẢNG CHI TIẾT SẢN PHẨM -->
-        <div class="overflow-x-auto rounded-md border border-gray-300">
-            <table class="w-full border-collapse text-xs min-w-[500px]"> <!-- Giảm min-width và font size -->
-                <thead>
-                    <tr class="bg-gray-100 font-semibold text-center">
-                        <th class="table-cell w-8">STT</th> <!-- Giảm độ rộng STT -->
-                        <th class="table-cell">Tên hàng</th>
-                        <th class="table-cell w-16">Đơn vị</th> <!-- Giảm độ rộng -->
-                        <th class="table-cell w-20">Số lượng</th> <!-- Giảm độ rộng -->
-                        <th class="table-cell w-24">Đơn giá</th> <!-- Giảm độ rộng -->
-                        <th class="table-cell w-24">Thành tiền</th> <!-- Giảm độ rộng -->
-                    </tr>
-                </thead>
-                <tbody id="invoice-items">
-                    <!-- Dữ liệu sẽ được chèn bởi JavaScript -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- TỔNG CỘNG -->
-        <div class="flex justify-end mt-4">
-            <div class="w-full sm:w-2/3 md:w-1/2 lg:w-2/5 space-y-2 text-xs"> <!-- Giảm cỡ chữ -->
-                <div class="flex justify-between">
-                    <span>Cộng tiền hàng:</span>
-                    <span id="cong-tien-hang" class="font-bold text-base">0</span> <!-- Giảm cỡ chữ -->
-                </div>
-                <div class="flex justify-between">
-                    <span>Tiền thuế GTGT:</span>
-                    <span id="tien-thue" class="font-bold text-base">0</span>
-                </div>
-                <div class="flex justify-between border-t border-black pt-1 mt-1">
-                    <span class="font-bold text-sm">Tổng tiền thanh toán:</span>
-                    <span id="tong-tien-thanh-toan" class="font-bold text-lg text-black">0</span> <!-- Giảm cỡ chữ -->
-                </div>
-            </div>
-        </div>
-
-        <!-- CHỮ KÝ VÀ GHI CHÚ -->
-        <div class="mt-6 text-xs space-y-2"> <!-- Giảm margin-top và font size -->
-            <p class="flex items-start">
-                <span class="font-semibold w-32 flex-shrink-0">Số tiền viết bằng chữ:</span> <!-- Giảm độ rộng nhãn -->
-                <span id="tien-chu" class="flex-grow p-1 editable-field text-sm" contenteditable="false"></span>
-            </p>
-            <p class="flex items-start">
-                <span class="font-semibold w-32 flex-shrink-0">Số chứng từ gốc kèm theo:</span>
-                <span id="so-chung-tu" class="flex-grow p-1 editable-field" contenteditable="false"></span>
-            </p>
-        </div>
-
-        <!-- CHỮ KÝ -->
-        <div class="flex justify-between text-center mt-8 text-xs"> <!-- Giảm margin-top và font size -->
-            <div class="w-1/3">
-                <p class="font-semibold">Người mua hàng</p>
-                <p class="italic font-light mt-6">(Ký, họ tên)</p> <!-- Giảm margin-top -->
-            </div>
-            <div class="w-1/3">
-                <p class="font-semibold">Kế toán trưởng</p>
-                <p class="italic font-light mt-6">(Ký, họ tên)</p>
-            </div>
-            <div class="w-1/3">
-                <p class="font-semibold">Giám đốc</p>
-                <p class="italic font-light mt-6">(Ký, họ tên)</p>
-            </div>
-        </div>
-
-        <!-- CÁC NÚT THAO TÁC (NO-PRINT) -->
-        <!-- Sử dụng flex-wrap để xuống dòng trên di động và các nút chiếm toàn bộ chiều rộng -->
-        <div class="no-print flex flex-wrap justify-center sm:flex-row sm:space-y-0 sm:space-x-4 mt-4"> 
-            <!-- Nút Thêm Sản Phẩm -->
-            <button id="add-item-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 text-sm mt-2 w-full sm:w-auto">
-                + Thêm Sản Phẩm
-            </button>
-            <!-- Nút Xóa Dòng Cuối Cùng -->
-            <button id="remove-last-item-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-sm mt-2 w-full sm:w-auto">
-                - Xóa Dòng Cuối Cùng
-            </button>
-            <!-- Nút Chỉnh Sửa -->
-            <button id="toggle-edit-btn" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 text-sm mt-2 w-full sm:w-auto">
-                [Chỉnh Sửa]
-            </button>
-        </div>
-
-        <!-- KHUNG CHỨC NĂNG XÓA (CHỈ HIỂN THỊ KHI Ở CHẾ ĐỘ EDIT) -->
-        <div id="delete-zone" class="no-print mt-4 p-3 border-2 border-dashed border-red-300 text-center hidden">
-            <p class="text-xs font-semibold text-red-600 mb-1">Vùng xóa dòng (Chỉ trong Chế độ Sửa)</p>
-            <p class="text-xs text-gray-500">Kéo và thả dòng sản phẩm vào đây để xóa hoặc reset.</p>
-        </div>
-    </div>
-
+    <!-- Cấu hình Font và Tailwind -->
     <script>
-        // Cấu hình Tailwind (nếu cần)
         tailwind.config = {
             theme: {
                 extend: {
@@ -238,484 +17,612 @@
                 }
             }
         }
+    </script>
+    <style>
+        /* Sử dụng font Inter cho toàn bộ tài liệu */
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* ĐỊNH DẠNG CHIỀU RỘNG CỘT CHO PHÙ HỢP (Yêu cầu mở rộng Tên hàng, thu gọn các cột số) */
+        .stt-col { width: 5%; }
+        .name-col { width: 45%; } /* Mở rộng cho Tên hàng */
+        .unit-col { width: 10%; } /* Thu gọn Đơn vị */
+        .qty-col { width: 10%; } /* Thu gọn Số lượng */
+        .price-col { width: 15%; } /* Thu gọn Đơn giá */
+        .total-col { width: 15%; } /* Giữ nguyên Thành tiền */
 
-        // --- Dữ liệu Sản phẩm Ban đầu ---
-        // Khởi tạo 6 dòng, 1 dòng có dữ liệu mẫu, 5 dòng trống
+        /* Tùy chỉnh input để trông giống text */
+        .editable-input, .editable-textarea {
+            outline: none;
+            border: none; /* Bỏ border mặc định */
+            padding: 0;
+            background: transparent;
+            width: 100%;
+        }
+        
+        /* Loại bỏ mũi tên spin của input number */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        /* Style cho các input trong phần tổng kết (Vẫn giữ border-bottom cho dễ phân biệt) */
+        .table-input {
+            text-align: right;
+            /* Giữ border-bottom cho các input tài chính (VAT, Cọc) */
+            border-bottom: 1px solid #e5e7eb; 
+        }
+
+        /* Loại bỏ gạch dưới cho input trong bảng chi tiết (Sản phẩm, Đơn vị, Số lượng, Đơn giá) */
+        .item-input-no-border {
+             border-bottom: none !important;
+        }
+
+        .table-cell {
+            padding: 8px 12px;
+            border-right: 1px solid #e5e7eb;
+        }
+
+        /* Giao diện cho chế độ không chỉnh sửa (read-only) */
+        .cursor-default { cursor: default; }
+        .opacity-75 { opacity: 0.75; }
+    </style>
+</head>
+<body class="bg-gray-50 p-2 md:p-8">
+
+    <!-- Đã điều chỉnh max-w-4xl xuống max-w-3xl để khung nhỏ hơn -->
+    <div id="invoice-container" class="max-w-3xl mx-auto bg-white shadow-xl rounded-lg p-4 md:p-8">
+        
+        <!-- HEADER VÀ THÔNG TIN CHUNG -->
+        <header class="text-center mb-6 border-b pb-4">
+            <h1 class="text-xl md:text-2xl font-bold text-gray-800">PHIẾU XUẤT KHO BÁN HÀNG</h1>
+            <p class="text-sm text-gray-600 mt-1" id="current-date">Ngày: 28 tháng 10 năm 2025</p>
+            <p class="text-sm text-gray-600">Nhân viên bán hàng: 
+                <!-- Thêm cursor-default cho trạng thái mặc định read-only -->
+                <span class="font-semibold cursor-pointer cursor-default" contenteditable="false" id="salesperson">QUYÊN</span>
+            </p>
+            <p class="text-sm text-gray-600">SĐT: 
+                <!-- Thêm cursor-default cho trạng thái mặc định read-only -->
+                <span class="font-semibold cursor-pointer cursor-default" contenteditable="false" id="salesperson-phone">0896581688</span>
+            </p>
+        </header>
+
+        <!-- THÔNG TIN KHÁCH HÀNG VÀ MÃ PHIẾU -->
+        <div class="flex flex-col md:flex-row justify-between mb-6 space-y-4 md:space-y-0">
+            <div class="text-sm text-gray-700 w-full md:w-3/5 space-y-1">
+                <!-- Thêm thuộc tính disabled cho trạng thái mặc định read-only -->
+                <p>Người mua: <input type="text" value="A" id="buyer-name" disabled class="editable-input font-medium border-b border-gray-300 w-4/5 ml-1 opacity-75" placeholder="Tên người mua"></p>
+                <p>SĐT: <input type="text" value="B" id="buyer-phone" disabled class="editable-input border-b border-gray-300 w-4/5 ml-1 opacity-75" placeholder="Số điện thoại"></p>
+                <p>Địa chỉ: <input type="text" value="C" id="buyer-address" disabled class="editable-input border-b border-gray-300 w-4/5 ml-1 opacity-75" placeholder="Địa chỉ"></p>
+                <p>Diễn giải: <input type="text" value="D" id="buyer-note" disabled class="editable-input border-b border-gray-300 w-4/5 ml-1 opacity-75" placeholder="Diễn giải"></p>
+            </div>
+            <div class="text-right w-full md:w-2/5">
+                <p class="text-base md:text-lg font-bold text-gray-800">Số: <span id="pxk-number">PXK...</span></p>
+            </div>
+        </div>
+
+        <!-- BẢNG CHI TIẾT SẢN PHẨM -->
+        <div class="overflow-x-auto shadow-md rounded-lg">
+            <table class="min-w-full bg-white border-collapse">
+                <thead>
+                    <tr class="bg-blue-500 text-white text-xs md:text-sm uppercase tracking-wider">
+                        <th class="stt-col table-cell border-b">STT</th>
+                        <th class="name-col table-cell border-b text-left">Tên hàng</th>
+                        <th class="unit-col table-cell border-b">Đơn vị</th>
+                        <th class="qty-col table-cell border-b">Số lượng</th>
+                        <th class="price-col table-cell border-b">Đơn giá</th>
+                        <th class="total-col table-cell border-b rounded-tr-lg">Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody id="item-table-body" class="text-gray-700 text-sm">
+                    <!-- Dynamic rows will be inserted here (rendered as disabled initially) -->
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- TỔNG KẾT VÀ TÍNH TOÁN -->
+        <div class="flex justify-end mt-4">
+            <div class="w-full md:w-2/3 lg:w-1/2 text-right text-sm space-y-2">
+                
+                <div class="flex justify-between items-center border-t pt-2">
+                    <span class="font-semibold text-gray-600">Cộng tiền hàng:</span>
+                    <span class="font-semibold text-gray-800" id="subtotal">0</span>
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Tiền thuế GTGT (VND):</span>
+                    <!-- Thêm thuộc tính disabled cho trạng thái mặc định read-only -->
+                    <input type="number" id="vat-tax" value="0" disabled class="editable-input table-input text-gray-800 w-1/2 p-1 focus:bg-gray-100 opacity-75" min="0" oninput="recalculate()">
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600 font-medium">Tiền Khách Đã Chuyển Khoản (Cọc):</span>
+                    <!-- Thêm thuộc tính disabled cho trạng thái mặc định read-only -->
+                    <input type="number" id="deposit-amount" value="0" disabled class="editable-input table-input text-gray-800 w-1/2 p-1 focus:bg-gray-100 opacity-75" min="0" oninput="recalculate()">
+                </div>
+
+                <div class="flex justify-between items-center border-t border-b py-2">
+                    <span class="text-base font-bold text-gray-700">Tổng tiền thanh toán (Cần Thu):</span>
+                    <span class="text-base font-bold text-red-600" id="total-due">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SỐ TIỀN BẰNG CHỮ VÀ CHỮ KÝ -->
+        <div class="mt-6 text-sm">
+            <p>Số tiền viết bằng chữ: 
+                <!-- Thêm cursor-default cho trạng thái mặc định read-only -->
+                <span class="font-medium text-blue-700 cursor-default" id="amount-in-words-display" contenteditable="false"></span>
+            </p>
+            <p class="mt-4">Số chứng từ gốc kèm theo: 
+                <span contenteditable="true" class="border-b border-gray-300 w-4/5 inline-block ml-1">...</span>
+            </p>
+        </div>
+
+        <!-- CHỮ KÝ -->
+        <div class="flex justify-between text-center mt-12 text-sm text-gray-700">
+            <div class="w-1/3">
+                <p class="font-bold">Người mua hàng</p>
+                <p class="italic mt-16">(Ký, họ tên)</p>
+            </div>
+            <div class="w-1/3">
+                <p class="font-bold">Kế toán trưởng</p>
+                <p class="italic mt-16">(Ký, họ tên)</p>
+            </div>
+            <div class="w-1/3">
+                <p class="font-bold">Giám đốc</p>
+                <p class="italic mt-16">(Ký, họ tên)</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- KHỐI CHỨC NĂNG (Nằm ngoài vùng in) -->
+    <div class="flex justify-center mt-6 space-x-4 print:hidden">
+        
+        <!-- Buttons for editing (hidden initially) -->
+        <button id="add-row-btn" onclick="addRow()" class="flex items-center bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-full shadow-lg transition duration-150 hidden">
+            <!-- Icon + -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+            + Thêm Sản Phẩm
+        </button>
+        <button id="remove-row-btn" onclick="removeLastRow()" class="flex items-center bg-red-400 hover:bg-red-500 text-white font-semibold py-2 px-4 rounded-full shadow-lg transition duration-150 hidden">
+            <!-- Icon - -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>
+            - Xóa Dòng Cuối Cùng
+        </button>
+        
+        <!-- Button to toggle edit mode -->
+        <button id="toggle-edit-btn" onclick="toggleEditMode()" class="flex items-center bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-full shadow-lg transition duration-150">
+            <!-- Initial icon: Edit (vì là nút Bật chế độ sửa) -->
+            <svg id="toggle-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.414 10.414L3 16.5V13.5l8.586-8.586 2.828 2.828z" />
+            </svg>
+            Sửa PXK
+        </button>
+        
+        <!-- Print button (hidden initially, visible in view mode) -->
+        <button id="print-btn" onclick="window.print()" class="flex items-center bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-full shadow-lg transition duration-150 hidden">
+            <!-- Icon Print -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4a3 3 0 00-3 3v6a3 3 0 003 3h10a3 3 0 003-3V7a3 3 0 00-3-3H5zm4 2a1 1 0 00-1 1v2a1 1 0 102 0V7a1 1 0 00-1-1zm8 5H3a1 1 0 01-1-1V8a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1z" clip-rule="evenodd" /></svg>
+            In Phiếu
+        </button>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA STATE ---
+        // Giảm số dòng mặc định xuống 5
         let items = [
-            { name: "Pha cốc ánh sáng vàng 500w", unit: "Cái", quantity: 2, unitPrice: 950000, id: Date.now() + 1 },
-            { name: "", unit: "", quantity: 0, unitPrice: 0, id: Date.now() + 2 },
-            { name: "", unit: "", quantity: 0, unitPrice: 0, id: Date.now() + 3 },
-            { name: "", unit: "", quantity: 0, unitPrice: 0, id: Date.now() + 4 },
-            { name: "", unit: "", quantity: 0, unitPrice: 0, id: Date.now() + 5 },
-            { name: "", unit: "", quantity: 0, unitPrice: 0, id: Date.now() + 6 },
+            { name: 'Pha cốc ánh sáng vàng 500W', unit: 'Cái', quantity: 2, unitPrice: 950000 },
+            { name: '', unit: '', quantity: 0, unitPrice: 0 },
+            { name: '', unit: '', quantity: 0, unitPrice: 0 },
+            { name: '', unit: '', quantity: 0, unitPrice: 0 },
+            { name: '', unit: '', quantity: 0, unitPrice: 0 }
         ];
-        const MIN_ROWS = 6;
-        const TAX_RATE = 0; // 0%
+        
+        let isEditable = false; // Trạng thái mặc định: KHÔNG chỉnh sửa
 
-        // --- Utils Functions ---
+        const TABLE_BODY_ID = 'item-table-body';
+        const PXK_NUMBER_ID = 'pxk-number';
+        const SUB_TOTAL_ID = 'subtotal';
+        const TOTAL_DUE_ID = 'total-due';
+        const AMOUNT_IN_WORDS_ID = 'amount-in-words-display';
+        const VAT_TAX_ID = 'vat-tax';
+        const DEPOSIT_AMOUNT_ID = 'deposit-amount';
+        const CURRENT_DATE_ID = 'current-date';
+
+        // --- HELPER FUNCTIONS ---
 
         /**
-         * Định dạng số thành chuỗi tiền tệ (ví dụ: 1,900,000)
+         * Chuyển số sang định dạng tiền tệ Việt Nam (1.000.000)
          * @param {number} amount
+         * @returns {string}
          */
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('vi-VN', {
-                style: 'decimal',
-                minimumFractionDigits: 0
-            }).format(Math.round(amount));
+        function formatVND(amount) {
+            if (typeof amount !== 'number') return '0';
+            return amount.toLocaleString('vi-VN');
         }
 
         /**
-         * Xóa định dạng khỏi chuỗi số (ví dụ: "1,900,000" -> 1900000)
-         * @param {string} formattedString
-         */
-        function unformatCurrency(formattedString) {
-            if (!formattedString) return 0;
-            // Xóa tất cả các dấu phẩy, dấu chấm (tùy theo định dạng)
-            const cleaned = String(formattedString).replace(/[.,\s]/g, ''); 
-            const parsed = parseFloat(cleaned);
-            return isNaN(parsed) ? 0 : parsed;
-        }
-
-        /**
-         * Hàm tạo Số Phiếu theo định dạng: PXKddmmyy + 1 Chữ cái (A-Z) + 3 Số ngẫu nhiên (000-999)
-         */
-        function generateDocumentNumber(date) {
-            const dd = String(date.getDate()).padStart(2, '0');
-            const mm = String(date.getMonth() + 1).padStart(2, '0');
-            const yy = String(date.getFullYear()).slice(-2);
-            const dateCode = dd + mm + yy;
-
-            // Chữ cái ngẫu nhiên A-Z
-            const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26));
-
-            // 3 số ngẫu nhiên 000-999
-            const randomNumber = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
-
-            return `PXK${dateCode}${randomLetter}${randomNumber}`;
-        }
-
-        /**
-         * Chuyển số thành chữ chuẩn tiếng Việt (hỗ trợ đến hàng tỷ)
-         * Đã fix lỗi "mốt" và "lăm"
+         * Chuyển đổi số thành chữ (tiếng Việt) - Logic rút gọn
+         * Hỗ trợ đến hàng Tỷ
          * @param {number} num
          * @returns {string}
          */
-        function numberToVietnameseText(num) {
-            num = Math.round(num);
-            if (num === 0) return "Không đồng chẵn.";
-            if (num > 999999999999) return "Số tiền quá lớn để tự động chuyển thành chữ.";
+        function numberToVietnameseWords(num) {
+            if (typeof num !== 'number' || num < 0) return 'Không đồng chẵn';
+            if (num === 0) return 'Không đồng chẵn';
 
-            const ones = ['', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+            const units = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
             const tens = ['', 'mười', 'hai mươi', 'ba mươi', 'bốn mươi', 'năm mươi', 'sáu mươi', 'bảy mươi', 'tám mươi', 'chín mươi'];
-            const scales = ['', 'nghìn', 'triệu', 'tỷ'];
+            const groups = ['', 'nghìn', 'triệu', 'tỷ'];
 
-            function readTriple(n) {
+            function readGroup(group) {
                 let s = '';
-                const h = Math.floor(n / 100);
-                const t = Math.floor((n % 100) / 10);
-                const o = n % 10;
+                const h = Math.floor(group / 100);
+                const t = Math.floor((group % 100) / 10);
+                const u = group % 10;
 
-                if (h > 0) s += `${ones[h]} trăm `;
-
-                if (t === 0 && o === 0) return s;
-
-                // Xử lý linh
-                if (h > 0 && t === 0 && o > 0) s += 'linh ';
-                
-                // Xử lý hàng chục
-                if (t === 1) { // 10-19
-                    s += 'mười '; 
-                } else if (t > 1) { // 20-99
-                    s += `${tens[t]} `;
+                if (h > 0) {
+                    s += units[h] + ' trăm ';
                 }
 
-                // Xử lý hàng đơn vị (o)
-                if (o > 0) {
-                    if (t === 1 && o === 5) { // 15
-                        s += 'lăm ';
-                    } else if (t > 1 && o === 5) { // 25, 35, ...
-                        s += 'lăm ';
-                    } else if (t > 1 && o === 1) { // 21, 31, ...
-                        s += 'mốt ';
-                    } else if (o > 0 && (t === 0 || t === 1)) { // 01-09, 11-19
-                        s += `${ones[o]} `;
-                    } else if (t >= 2 && o !== 1 && o !== 5) { // 22, 33, ...
-                        s += `${ones[o]} `;
-                    }
+                if (t === 1) {
+                    s += 'mười ';
+                } else if (t > 1) {
+                    s += tens[t] + ' ';
                 }
 
-                s = s.trim().replace(/\s+/g, ' '); 
-                return s;
+                if (u > 0 && t !== 1) {
+                    s += units[u];
+                } else if (u > 0 && t === 1) {
+                    s += (u === 5 ? 'lăm' : units[u]);
+                }
+
+                if (t === 0 && u === 0 && h > 0) {
+                    s = s.trim(); // Tránh lỗi "trăm không"
+                }
+
+                // Xử lý đặc biệt cho 1 và 5
+                s = s.replace('một mười', 'mười'); // 10 -> mười
+                s = s.replace('mươi năm', 'mươi lăm'); // 25 -> hai mươi lăm
+                s = s.replace('mười năm', 'mười lăm'); // 15 -> mười lăm
+                s = s.replace('linh một', 'lẻ một'); // 101 -> một trăm lẻ một
+
+                return s.trim();
             }
 
-            let text = '';
-            let tempNum = num;
+            let result = '';
             let i = 0;
+            let tempNum = num;
 
-            while (tempNum > 0 && i < scales.length) {
-                const triple = tempNum % 1000;
+            while (tempNum > 0) {
+                const group = tempNum % 1000;
                 tempNum = Math.floor(tempNum / 1000);
 
-                if (triple > 0) {
-                    let tripleText = readTriple(triple);
-                    
-                    if (i > 0) tripleText += ` ${scales[i]}`;
-                    text = tripleText + ' ' + text;
+                if (group > 0) {
+                    let groupWords = readGroup(group);
+                    if (groupWords !== '') {
+                        result = groupWords + ' ' + groups[i] + ' ' + result;
+                    }
                 }
-                
                 i++;
             }
 
-            text = text.trim().replace(/\s+/g, ' '); 
-            text = text.charAt(0).toUpperCase() + text.slice(1);
+            // Capitalize first letter and add currency unit
+            result = result.trim();
+            if (result.length > 0) {
+                result = result.charAt(0).toUpperCase() + result.slice(1);
+                result += ' đồng chẵn.';
+                result = result.replace(/\s+/g, ' '); // Remove extra spaces
+            }
+
+            return result || 'Không đồng chẵn.';
+        }
+
+
+        /**
+         * Tạo mã PXK theo format: PXK + DDMMYY + Random A-Z + 4 Random Digits
+         * @returns {string}
+         */
+        function generatePxkNumber() {
+            const now = new Date();
+            const dd = String(now.getDate()).padStart(2, '0');
+            const mm = String(now.getMonth() + 1).padStart(2, '0');
+            const yy = String(now.getFullYear()).slice(-2);
             
-            return text + " đồng chẵn.";
-        }
+            const randomLetter = String.fromCharCode(65 + Math.floor(Math.random() * 26)); // A-Z
+            const randomDigits = String(Math.floor(1000 + Math.random() * 9000)); // 4 digits
 
-
-        // --- Main Logic ---
-        let isEditMode = false;
-
-        /**
-         * Lắng nghe sự kiện input trên các trường số lượng/đơn giá để tính toán lại tổng tiền.
-         * @param {Event} event
-         */
-        function handleItemInputChange(event) {
-            const input = event.target;
-            const itemId = parseInt(input.closest('tr').dataset.itemId);
-            const key = input.dataset.key; // 'quantity' hoặc 'unitPrice'
-            let value = unformatCurrency(input.value);
-
-            // Cập nhật dữ liệu
-            const itemIndex = items.findIndex(item => item.id === itemId);
-            if (itemIndex !== -1) {
-                // Đảm bảo số lượng/đơn giá không âm
-                if (value < 0) value = 0;
-
-                items[itemIndex][key] = value;
-            }
-
-            // Định dạng lại giá trị hiển thị 
-            if (key === 'unitPrice') {
-                 // Format lại đơn giá sau khi nhập
-                 input.value = formatCurrency(value);
-            }
-            if (key === 'quantity') {
-                // Format lại số lượng
-                input.value = value.toFixed(value % 1 !== 0 ? 2 : 0);
-            }
-
-            calculateTotals();
-        }
-
-        /**
-         * Thêm một dòng sản phẩm mới vào bảng
-         */
-        function addItem() {
-            const newItem = { name: "", unit: "", quantity: 0, unitPrice: 0, id: Date.now() + Math.random() };
-            items.push(newItem);
-            renderItems();
-            // Đảm bảo các input mới được đặt contenteditable = true khi ở chế độ edit
-            setEditMode(true); 
-            calculateTotals();
-        }
-
-        /**
-         * Xóa một dòng sản phẩm khỏi bảng
-         * @param {number} itemId
-         */
-        function deleteItem(itemId) {
-            // Kiểm tra số lượng dòng hiện tại (đã được fill)
-            if (items.length <= MIN_ROWS) {
-                // Nếu số lượng dòng ít hơn hoặc bằng MIN_ROWS, reset dòng đó thay vì xóa
-                const index = items.findIndex(item => item.id === itemId);
-                if (index !== -1) {
-                    items[index] = { name: "", unit: "", quantity: 0, unitPrice: 0, id: Date.now() + Math.random() };
-                }
-            } else {
-                // Xóa dòng nếu nhiều hơn MIN_ROWS
-                items = items.filter(item => item.id !== itemId);
-            }
-            renderItems();
-            // Đảm bảo các input mới được đặt contenteditable = true khi ở chế độ edit
-            setEditMode(true); 
-            calculateTotals();
-        }
-
-        /**
-         * Xóa dòng cuối cùng (chỉ áp dụng nếu số dòng > MIN_ROWS)
-         */
-        function removeLastItem() {
-            if (items.length > MIN_ROWS) {
-                // Lấy ID của phần tử cuối cùng
-                items.pop();
-                
-                renderItems();
-                calculateTotals();
-                // Nút Chỉnh Sửa phải được bật để người dùng nhìn thấy thay đổi ngay
-                setEditMode(true); 
-            }
+            return `PXK${dd}${mm}${yy}${randomLetter}${randomDigits}`;
         }
         
-        /**
-         * Cập nhật trạng thái nút xóa dòng
-         */
-        function updateRemoveButtonState() {
-            const removeBtn = document.getElementById('remove-last-item-btn');
-            if (removeBtn) {
-                // Chỉ cho phép xóa khi số dòng lớn hơn MIN_ROWS
-                removeBtn.disabled = items.length <= MIN_ROWS;
-            }
-        }
-
-
-        /**
-         * Tính toán lại tất cả các tổng tiền và cập nhật UI
-         */
-        function calculateTotals() {
-            let subtotal = 0;
-
-            items.forEach(item => {
-                const total = item.quantity * item.unitPrice;
-                subtotal += total;
-
-                // Cập nhật cột Thành tiền trong UI
-                const totalCell = document.querySelector(`tr[data-item-id="${item.id}"] .item-total`);
-                if (totalCell) {
-                    totalCell.textContent = formatCurrency(total);
-                }
-            });
-
-            const taxAmount = subtotal * TAX_RATE;
-            const grandTotal = subtotal + taxAmount;
-            
-            // Cập nhật tổng tiền hàng
-            document.getElementById('cong-tien-hang').textContent = formatCurrency(subtotal);
-            // Cập nhật thuế
-            document.getElementById('tien-thue').textContent = formatCurrency(taxAmount);
-            // Cập nhật tổng thanh toán
-            document.getElementById('tong-tien-thanh-toan').textContent = formatCurrency(grandTotal);
-
-            // Cập nhật số tiền viết bằng chữ
-            // Chỉ cập nhật nếu đang ở chế độ không sửa (để tránh ghi đè nội dung do người dùng nhập)
-            if (!isEditMode) {
-                 document.getElementById('tien-chu').textContent = numberToVietnameseText(grandTotal);
-            }
-        }
+        // --- CORE LOGIC ---
         
         /**
-         * Render/Vẽ lại các dòng sản phẩm trong bảng
+         * Render bảng chi tiết sản phẩm từ mảng items
          */
-        function renderItems() {
-            const tbody = document.getElementById('invoice-items');
-            tbody.innerHTML = '';
+        function renderTable() {
+            const tableBody = document.getElementById(TABLE_BODY_ID);
+            if (!tableBody) return;
 
-            // Đảm bảo luôn có tối thiểu 6 dòng
-            while (items.length < MIN_ROWS) {
-                items.push({ name: "", unit: "", quantity: 0, unitPrice: 0, id: Date.now() + Math.random() });
-            }
-
+            tableBody.innerHTML = '';
+            
             items.forEach((item, index) => {
-                const total = item.quantity * item.unitPrice;
-
                 const row = document.createElement('tr');
-                row.dataset.itemId = item.id;
-                // Thêm thuộc tính draggable cho phép kéo thả
-                row.setAttribute('draggable', true);
-                row.addEventListener('dragstart', handleDragStart);
+                row.className = 'border-b hover:bg-gray-50 transition duration-100';
+
+                // Calculate subtotal for this item
+                const subtotal = item.quantity * item.unitPrice;
                 
-                // Thêm sự kiện để hiển thị vùng xóa khi kéo qua
-                row.addEventListener('dragover', (e) => { e.preventDefault(); });
+                // Thêm thuộc tính disabled dựa trên isEditable
+                const disabledAttr = isEditable ? '' : 'disabled';
+                const opacityClass = isEditable ? '' : 'opacity-75';
 
                 row.innerHTML = `
-                    <td class="table-cell">${index + 1}</td>
-                    <td class="table-cell table-cell-input-text">
-                        <span contenteditable="false" data-key="name" class="editable-field item-input rounded">${item.name}</span>
+                    <td class="stt-col table-cell text-center font-medium">${index + 1}</td>
+                    <td class="name-col table-cell text-left">
+                        <input type="text" value="${item.name}" 
+                               data-index="${index}" data-field="name" 
+                               class="editable-input w-full ${opacityClass}" 
+                               onchange="updateItemData(this)" ${disabledAttr}>
                     </td>
-                    <td class="table-cell table-cell-input-text w-16">
-                        <span contenteditable="false" data-key="unit" class="editable-field item-input rounded">${item.unit}</span>
+                    <td class="unit-col table-cell text-center">
+                        <input type="text" value="${item.unit}" 
+                               data-index="${index}" data-field="unit" 
+                               class="editable-input w-full text-center ${opacityClass}" 
+                               onchange="updateItemData(this)" ${disabledAttr}>
                     </td>
-                    <td class="table-cell table-cell-input-num w-20">
-                        <input type="number" min="0" step="0.01" value="${item.quantity.toFixed(item.quantity % 1 !== 0 ? 2 : 0)}" data-key="quantity" class="item-input text-right" disabled />
+                    <td class="qty-col table-cell text-center">
+                        <input type="number" value="${item.quantity}" 
+                               data-index="${index}" data-field="quantity" 
+                               class="editable-input text-center font-medium ${opacityClass}" 
+                               min="0" oninput="updateItemData(this)" ${disabledAttr}>
                     </td>
-                    <td class="table-cell table-cell-input-num w-24">
-                        <input type="text" value="${formatCurrency(item.unitPrice)}" data-key="unitPrice" class="item-input text-right" disabled />
+                    <td class="price-col table-cell">
+                        <input type="text" value="${formatVND(item.unitPrice)}" 
+                               data-index="${index}" data-field="unitPrice" 
+                               class="editable-input font-medium text-right ${opacityClass}" 
+                               onblur="formatAndRecalc(this)" 
+                               onfocus="this.value = this.value.replace(/\\./g, '')" ${disabledAttr}>
                     </td>
-                    <td class="total-cell item-total w-24">${formatCurrency(total)}</td>
+                    <td class="total-col table-cell text-right font-bold text-gray-800" data-subtotal="${subtotal}">
+                        ${formatVND(subtotal)}
+                    </td>
                 `;
-                tbody.appendChild(row);
-                
-                // Lắng nghe sự kiện input cho các trường số lượng/đơn giá
-                const quantityInput = row.querySelector('input[data-key="quantity"]');
-                const unitPriceInput = row.querySelector('input[data-key="unitPrice"]');
+                tableBody.appendChild(row);
+            });
+        }
 
-                if (quantityInput) quantityInput.addEventListener('input', handleItemInputChange);
-                if (unitPriceInput) unitPriceInput.addEventListener('input', handleItemInputChange);
+        /**
+         * Cập nhật dữ liệu trong mảng items khi có input thay đổi
+         * @param {HTMLInputElement} inputElement
+         */
+        function updateItemData(inputElement) {
+            const index = parseInt(inputElement.getAttribute('data-index'));
+            const field = inputElement.getAttribute('data-field');
+            let value = inputElement.value;
+
+            // Xóa dấu chấm phân cách hàng nghìn cho số
+            if (field === 'quantity') {
+                value = parseInt(value) || 0;
+            } else if (field === 'unitPrice') {
+                // Xử lý giá trị number sau khi formatAndRecalc được gọi
+                // Tạm thời, giá trị đã được xử lý trong formatAndRecalc
+                return; 
+            }
+            
+            items[index][field] = value;
+            recalculate();
+        }
+        
+        /**
+         * Xử lý format và cập nhật giá trị Đơn giá (Unit Price)
+         * @param {HTMLInputElement} inputElement
+         */
+        function formatAndRecalc(inputElement) {
+            const index = parseInt(inputElement.getAttribute('data-index'));
+            const field = inputElement.getAttribute('data-field');
+            let value = inputElement.value.replace(/\./g, ''); // Xóa dấu chấm
+            let numberValue = parseInt(value) || 0;
+            
+            // Cập nhật giá trị số vào state
+            items[index][field] = numberValue;
+            
+            // Format lại input trên UI
+            inputElement.value = formatVND(numberValue);
+            
+            recalculate();
+        }
+
+
+        /**
+         * Tính toán lại toàn bộ tổng kết
+         */
+        function recalculate() {
+            let totalSubtotal = 0;
+            
+            // 1. Tính Cộng tiền hàng
+            items.forEach(item => {
+                const subtotal = (parseInt(item.quantity) || 0) * (parseInt(item.unitPrice) || 0);
+                totalSubtotal += subtotal;
             });
             
-            // Cập nhật trạng thái nút Xóa
-            updateRemoveButtonState();
-        }
+            // 2. Lấy giá trị Thuế và Tiền cọc (Đảm bảo là số)
+            const vatTax = parseInt(document.getElementById(VAT_TAX_ID).value.replace(/\./g, '')) || 0;
+            const deposit = parseInt(document.getElementById(DEPOSIT_AMOUNT_ID).value.replace(/\./g, '')) || 0;
 
-        /**
-         * Xử lý bắt đầu kéo
-         */
-        function handleDragStart(e) {
-            if (!isEditMode) {
-                e.preventDefault();
-                return;
-            }
-            // Lưu ID của dòng đang được kéo
-            e.dataTransfer.setData('text/plain', e.target.dataset.itemId);
-            // Thêm class để dòng đang kéo trông khác biệt
-            e.target.classList.add('opacity-50');
-        }
+            // 3. Tính Tổng tiền thanh toán
+            const totalMerchandise = totalSubtotal + vatTax;
+            const totalDue = totalMerchandise - deposit;
+            
+            // 4. Cập nhật UI
+            document.getElementById(SUB_TOTAL_ID).textContent = formatVND(totalSubtotal);
+            document.getElementById(TOTAL_DUE_ID).textContent = formatVND(totalDue);
+            
+            // Format lại VAT và Deposit để người dùng dễ nhìn
+            document.getElementById(VAT_TAX_ID).value = formatVND(vatTax);
+            document.getElementById(DEPOSIT_AMOUNT_ID).value = formatVND(deposit);
+            
+            // Cập nhật Số tiền viết bằng chữ
+            document.getElementById(AMOUNT_IN_WORDS_ID).textContent = numberToVietnameseWords(totalDue);
 
-        /**
-         * Xử lý kéo kết thúc (rơi vào vùng xóa)
-         */
-        function handleDrop(e) {
-            e.preventDefault();
-            if (!isEditMode) return;
-
-            const itemId = e.dataTransfer.getData('text/plain');
-            if (itemId) {
-                // Thực hiện xóa dòng
-                deleteItem(parseInt(itemId));
-            }
-            // Xóa hiệu ứng hover/drag
-            document.getElementById('delete-zone').classList.remove('bg-red-100', 'border-red-500');
-        }
-
-        /**
-         * Xử lý kéo qua (hiệu ứng hover cho vùng xóa)
-         */
-        function handleDragOver(e) {
-            e.preventDefault(); // Cho phép drop
-            if (!isEditMode) return;
-
-            const deleteZone = document.getElementById('delete-zone');
-            // Thêm hiệu ứng khi kéo qua vùng xóa
-            deleteZone.classList.add('bg-red-100', 'border-red-500');
-        }
-
-        /**
-         * Xử lý khi rời khỏi vùng xóa
-         */
-        function handleDragLeave(e) {
-            if (!isEditMode) return;
-            // Xóa hiệu ứng khi rời khỏi vùng xóa
-            document.getElementById('delete-zone').classList.remove('bg-red-100', 'border-red-500');
-        }
-
-        /**
-         * Xử lý khi kết thúc kéo (dù có drop hay không)
-         */
-        function handleDragEnd(e) {
-            // Loại bỏ class opacity-50 khỏi dòng đang kéo
-            e.target.classList.remove('opacity-50');
-        }
-
-        /**
-         * Bật/Tắt chế độ chỉnh sửa
-         * @param {boolean} forceState - Nếu có, buộc chế độ sửa chữa thành true/false
-         */
-        function setEditMode(forceState) {
-            if (forceState !== undefined) {
-                isEditMode = forceState;
+            // Cần render lại bảng để cập nhật cột Thành tiền (Subtotal)
+            if (isEditable) {
+                renderTable();
             } else {
-                isEditMode = !isEditMode; // Toggle state
-            }
-
-            const toggleBtn = document.getElementById('toggle-edit-btn');
-            const editableFields = document.querySelectorAll('.editable-field');
-            const itemInputs = document.querySelectorAll('#invoice-items input');
-            const deleteZone = document.getElementById('delete-zone');
-            const body = document.body;
-
-            if (isEditMode) {
-                body.classList.add('edit-mode');
-                deleteZone.classList.remove('hidden'); // Hiển thị vùng xóa
-                toggleBtn.textContent = "[Hoàn Tất Chỉnh Sửa]";
-                toggleBtn.classList.remove('bg-gray-700');
-                toggleBtn.classList.add('bg-green-600');
-                
-                // Kích hoạt các trường contenteditable
-                editableFields.forEach(field => {
-                    field.setAttribute('contenteditable', 'true');
-                    field.classList.add('border-gray-300', 'border'); // Thêm viền khi sửa
+                // Chỉ cập nhật hiển thị nếu không ở chế độ edit để tránh mất focus
+                const totalCells = document.querySelectorAll('[data-subtotal]');
+                items.forEach((item, index) => {
+                    const subtotal = (parseInt(item.quantity) || 0) * (parseInt(item.unitPrice) || 0);
+                    if (totalCells[index]) {
+                         totalCells[index].textContent = formatVND(subtotal);
+                    }
                 });
-
-                // Kích hoạt các input số lượng/đơn giá
-                itemInputs.forEach(input => {
-                    input.removeAttribute('disabled');
-                });
-            } else {
-                body.classList.remove('edit-mode');
-                deleteZone.classList.add('hidden'); // Ẩn vùng xóa
-                toggleBtn.textContent = "[Chỉnh Sửa]";
-                toggleBtn.classList.remove('bg-green-600');
-                toggleBtn.classList.add('bg-gray-700');
-
-                // Vô hiệu hóa các trường contenteditable
-                editableFields.forEach(field => {
-                    field.setAttribute('contenteditable', 'false');
-                    field.classList.remove('border-gray-300', 'border'); // Ẩn viền khi hoàn tất
-                });
-                
-                // Vô hiệu hóa các input số lượng/đơn giá
-                itemInputs.forEach(input => {
-                    input.setAttribute('disabled', 'disabled');
-                });
-
-                // Tính toán lại tổng tiền lần cuối (để cập nhật số tiền viết bằng chữ)
-                calculateTotals();
             }
         }
 
         /**
-         * Hàm chính để khởi tạo và hiển thị tài liệu
+         * Bật/tắt chế độ chỉnh sửa (Sửa PXK)
          */
-        function renderDocument() {
+        function toggleEditMode() {
+            isEditable = !isEditable;
+            
+            // Cập nhật trạng thái các nút chức năng
+            const btnAdd = document.getElementById('add-row-btn');
+            const btnRemove = document.getElementById('remove-row-btn');
+            const btnPrint = document.getElementById('print-btn');
+            const btnToggle = document.getElementById('toggle-edit-btn');
+            const iconToggle = document.getElementById('toggle-icon');
+            
+            if (isEditable) {
+                // Vào chế độ chỉnh sửa
+                btnAdd.classList.remove('hidden');
+                btnRemove.classList.remove('hidden');
+                btnPrint.classList.add('hidden');
+                btnToggle.textContent = 'Khóa PXK';
+                btnToggle.classList.remove('bg-gray-700');
+                btnToggle.classList.add('bg-orange-500');
+                
+                // Đổi icon sang Lock
+                iconToggle.innerHTML = '<path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />';
+                
+                console.log("Đã bật chế độ chỉnh sửa.");
+            } else {
+                // Ra khỏi chế độ chỉnh sửa (chế độ xem/in)
+                btnAdd.classList.add('hidden');
+                btnRemove.classList.add('hidden');
+                btnPrint.classList.remove('hidden');
+                btnToggle.textContent = 'Sửa PXK';
+                btnToggle.classList.remove('bg-orange-500');
+                btnToggle.classList.add('bg-gray-700');
+                
+                // Đổi icon sang Edit
+                iconToggle.innerHTML = '<path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zm-1.414 10.414L3 16.5V13.5l8.586-8.586 2.828 2.828z" />';
+                
+                console.log("Đã khóa chế độ chỉnh sửa.");
+            }
+            
+            // Cập nhật trạng thái input của toàn bộ phiếu
+            updateFormEditability();
+        }
+
+        /**
+         * Cập nhật trạng thái editable/disabled cho toàn bộ form
+         */
+        function updateFormEditability() {
+            // 1. Cập nhật các input trong bảng
+            renderTable();
+
+            // 2. Cập nhật các input ngoài bảng (thông tin khách hàng, thuế, cọc)
+            const externalInputs = [
+                'buyer-name', 'buyer-phone', 'buyer-address', 'buyer-note',
+                VAT_TAX_ID, DEPOSIT_AMOUNT_ID
+            ];
+            externalInputs.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.disabled = !isEditable;
+                    if (isEditable) {
+                        input.classList.remove('opacity-75');
+                    } else {
+                        input.classList.add('opacity-75'); // Visual hint for disabled state
+                    }
+                }
+            });
+
+            // 3. Cập nhật các span contenteditable (NV bán hàng, Số tiền bằng chữ)
+            const contentEditables = [
+                'salesperson', 'salesperson-phone', AMOUNT_IN_WORDS_ID
+            ];
+            contentEditables.forEach(id => {
+                const span = document.getElementById(id);
+                if (span) {
+                    span.contentEditable = isEditable;
+                    if (isEditable) {
+                        span.classList.add('border-b', 'border-gray-300', 'hover:border-blue-500');
+                        span.classList.remove('cursor-default');
+                    } else {
+                        span.classList.remove('border-b', 'border-gray-300', 'hover:border-blue-500');
+                        span.classList.add('cursor-default');
+                    }
+                }
+            });
+            
+            // 4. Kích hoạt render lại để đảm bảo mọi thứ đồng bộ
+            recalculate();
+        }
+
+
+        /**
+         * Thêm một dòng sản phẩm mới vào danh sách
+         */
+        function addRow() {
+            if (!isEditable) return; // Chỉ cho phép khi edit mode
+            items.push({ name: '', unit: '', quantity: 0, unitPrice: 0 });
+            recalculate();
+        }
+
+        /**
+         * Xóa dòng cuối cùng trong danh sách
+         */
+        function removeLastRow() {
+            if (!isEditable) return; // Chỉ cho phép khi edit mode
+            if (items.length > 1) {
+                items.pop();
+                recalculate();
+            } else {
+                console.log('Không thể xóa dòng cuối cùng. Phiếu phải có ít nhất 1 sản phẩm.');
+            }
+        }
+        
+        /**
+         * Khởi tạo ứng dụng
+         */
+        function initialize() {
+            // 1. Set ngày hiện tại
             const today = new Date();
+            const options = { day: '2-digit', month: 'long', year: 'numeric' };
+            document.getElementById(CURRENT_DATE_ID).textContent = `Ngày: ${today.toLocaleDateString('vi-VN', options)}`;
             
-            // 1. Cập nhật Ngày/Tháng/Năm trên header
-            const day = today.getDate();
-            const month = today.getMonth() + 1;
-            const year = today.getFullYear();
-            document.getElementById('document-date').textContent = `Ngày: ${day} tháng ${month} năm ${year}`;
-
-            // 2. Cập nhật Số Phiếu
-            document.getElementById('so-phieu').textContent = generateDocumentNumber(today);
-
-            // 3. Render bảng chi tiết (luôn đảm bảo 6 dòng)
-            renderItems();
-
-            // 4. Tính toán tổng tiền lần đầu
-            calculateTotals();
-
-            // 5. Gán sự kiện cho các nút và vùng xóa
-            document.getElementById('add-item-btn').addEventListener('click', addItem);
-            document.getElementById('remove-last-item-btn').addEventListener('click', removeLastItem); // Gán sự kiện cho nút xóa
-            document.getElementById('toggle-edit-btn').addEventListener('click', () => setEditMode());
+            // 2. Tạo và hiển thị mã PXK
+            document.getElementById(PXK_NUMBER_ID).textContent = generatePxkNumber();
             
-            const deleteZone = document.getElementById('delete-zone');
-            deleteZone.addEventListener('drop', handleDrop);
-            deleteZone.addEventListener('dragover', handleDragOver);
-            deleteZone.addEventListener('dragleave', handleDragLeave);
-            
-            // Gán sự kiện dragend cho tất cả các dòng (vì dragend không phải là sự kiện của drop zone)
-            document.querySelectorAll('#invoice-items tr').forEach(row => {
-                row.addEventListener('dragend', handleDragEnd);
-            });
-
-            // Khởi tạo ở chế độ xem (không sửa)
-            setEditMode(false);
+            // 3. Set trạng thái ban đầu là read-only và render/tính toán
+            isEditable = false;
+            updateFormEditability();
         }
 
-        // Chạy hàm khi trang được tải
-        window.onload = renderDocument;
+        // Bắt đầu ứng dụng khi tài liệu được tải
+        window.onload = initialize;
+
+        // Gắn hàm global cho buttons
+        window.addRow = addRow;
+        window.removeLastRow = removeLastRow;
+        window.recalculate = recalculate; // Cần thiết cho oninput/onchange của các trường tổng kết
+        window.updateItemData = updateItemData;
+        window.formatAndRecalc = formatAndRecalc;
+        window.toggleEditMode = toggleEditMode; // Gắn hàm mới
     </script>
 </body>
 </html>
